@@ -979,24 +979,23 @@ while [ $# -ne 0 ]; do
 		-*)
 			fail "unknown option ${cur}"
 			;;
-        *)
-            if [ -z "${DISK}" ]; then
-                case "$cur" in
-                    *[!0-9]*[0-9]*)
-                        DISK=$(echo "$cur" | sed -E 's/p?[0-9]+$//')
-                        PART=$(echo "$cur" | sed -E 's/.*[^0-9]([0-9]+)$/\1/')
-                        ;;
-                    *)
-                        DISK="$cur"
-                        ;;
-                esac
-            else
-                if [ -z "${PART}" ]; then
-                    PART="${cur}"
-                fi
-            fi
-            ;;
-
+		*)
+			if [ -z "${DISK}" ]; then
+				case "$cur" in
+					*[0-9]p[0-9]*) PART=${cur##*p} DISK=${cur%"p$PART"} ;;
+					*[!0-9][0-9]*) if [ -n "$next" ] && [ -z "$PART" ]; then
+								   	  	DISK=$cur
+								   else
+									   	PART=${cur##*[!0-9]} DISK=${cur%"$PART"}
+								   fi ;;
+					*) DISK=$cur ;;
+				esac
+			else
+				if [ -z "${PART}" ]; then
+					PART=$cur
+				fi
+			fi
+			;;
 	esac
 	shift
 done
